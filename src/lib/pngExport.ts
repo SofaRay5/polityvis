@@ -3,6 +3,8 @@ export const safeExportFilename = (countryName: string, kind: 'overview' | 'parl
   return `${country}-${kind}-${date}.png`
 }
 
+export const isExportInProgress = (exporting: 'overview' | 'parliament' | null): boolean => exporting !== null
+
 export const downloadSvgPng = async (svg: SVGSVGElement, filename: string): Promise<void> => {
   const source = new XMLSerializer().serializeToString(svg)
   const url = URL.createObjectURL(new Blob([source], { type: 'image/svg+xml;charset=utf-8' }))

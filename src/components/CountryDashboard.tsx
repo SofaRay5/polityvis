@@ -2,7 +2,7 @@ import html2canvas from 'html2canvas'
 import { useRef, useState } from 'react'
 import { regimePresets } from '../data/regimePresets'
 import { messages } from '../i18n/messages'
-import { downloadSvgPng, safeExportFilename } from '../lib/pngExport'
+import { downloadSvgPng, isExportInProgress, safeExportFilename } from '../lib/pngExport'
 import type { Country, Locale, SystemAxis } from '../types/politics'
 import { ParliamentChart } from './ParliamentChart'
 import { PowerMap } from './PowerMap'
@@ -76,6 +76,6 @@ export function CountryDashboard({ country, locale }: { country: Country; locale
       <section className="dashboard-panel sources-panel"><div className="panel-heading"><div><p className="eyebrow">{t['overview.snapshot']}</p><h2>{t['overview.sources']}</h2></div></div>{country.snapshot ? <><p className="snapshot-date">{t['overview.snapshotDate']}: {country.snapshot.date}</p><ul className="source-list">{country.snapshot.sources.map((source) => <li key={source}><a href={source} target="_blank" rel="noreferrer">{source}</a></li>)}</ul></> : <p className="empty-detail">{t['overview.noSnapshot']}</p>}</section>
     </div>
   </div>
-  <div className="export-controls"><button type="button" className="button-subtle" onClick={exportDashboard} disabled={exporting === 'overview'}>{exporting === 'overview' ? t['dashboard.exporting'] : t['dashboard.exportOverview']}</button><button type="button" className="button-primary" onClick={exportParliament} disabled={exporting === 'parliament'}>{exporting === 'parliament' ? t['dashboard.exporting'] : t['dashboard.exportParliament']}</button>{exportError && <p role="alert">{t['dashboard.exportError']}</p>}</div>
+  <div className="export-controls"><button type="button" className="button-subtle" onClick={exportDashboard} disabled={isExportInProgress(exporting)}>{exporting === 'overview' ? t['dashboard.exporting'] : t['dashboard.exportOverview']}</button><button type="button" className="button-primary" onClick={exportParliament} disabled={isExportInProgress(exporting)}>{exporting === 'parliament' ? t['dashboard.exporting'] : t['dashboard.exportParliament']}</button>{exportError && <p role="alert">{t['dashboard.exportError']}</p>}</div>
   </section>
 }
