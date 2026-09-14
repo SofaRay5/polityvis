@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useAppState } from '../context/AppStateContext'
 import { messages } from '../i18n/messages'
 import { createCountryFromDraft } from '../lib/countryBuilder'
@@ -10,10 +9,10 @@ const colors = ['#2879ff', '#e85d63', '#35bf88', '#e6b83f', '#9b70e9', '#37b7c8'
 const id = () => crypto.randomUUID()
 const label = (zh: string, en: string): TranslatedLabel => ({ zh, en })
 
-export function CountryEditor({ initialDraft, onBack }: { initialDraft: CountryDraft; onBack: () => void }) {
+export function CountryEditor({ draft, onDraftChange, onBack }: { draft: CountryDraft; onDraftChange: (draft: CountryDraft) => void; onBack: () => void }) {
   const { locale, createCountry } = useAppState()
   const t = messages[locale]
-  const [draft, setDraft] = useState<CountryDraft>(() => structuredClone(initialDraft))
+  const setDraft = onDraftChange
   const issues = validateCountryDraft(draft).issues
   const updateOffices = (offices: ExecutiveOffice[]) => setDraft({ ...draft, executiveOffices: offices })
   const updateChambers = (chambers: LegislativeChamber[]) => setDraft({ ...draft, chambers })

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { franceSeed } from '../data/france'
+import { regimePresets } from '../data/regimePresets'
+import { createCountryFromDraft } from './countryBuilder'
 import { loadCountries, loadLocale, normaliseCountry, saveCountries } from './countryStorage'
 
 class MapStorage implements Storage {
@@ -92,6 +94,23 @@ describe('country storage', () => {
     saveCountries([franceSeed], storage)
 
     expect(storage.getItem('polityvis:countries:v1')).toBe(JSON.stringify([franceSeed]))
+  })
+
+  it('round-trips a valid edited country with every editable institution list', () => {
+    const storage = new MapStorage()
+    const draft = structuredClone(regimePresets.parliamentaryMonarchy.default)
+    draft.name = 'Edited Parliamentia'
+    draft.executiveOffices![0].terms = 6
+    draft.chambers!.push({ id: 'senate', label: { zh: '参议院', en: 'Senate' }, seats: 12, selectionMethod: 'appointment', isPartyChamber: false })
+    draft.courts!.push({ id: 'appeal', label: { zh: '上诉法院', en: 'Court of Appeal' }, level: 1 })
+    draft.territorialLevels!.push({ id: 'districts', label: { zh: '区', en: 'Districts' }, count: 40, autonomy: 20 })
+    draft.parties![0].ideologyPosition = -50
+    draft.parties![1].ideologyPosition = 50
+    const country = createCountryFromDraft(draft, 'custom', '2026-09-14T00:00:00.000Z')
+
+    saveCountries([country], storage)
+
+    expect(loadCountries(storage)).toEqual([country])
   })
 
   it('defaults to Chinese when no valid locale is stored', () => {

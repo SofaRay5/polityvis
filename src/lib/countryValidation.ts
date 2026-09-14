@@ -3,6 +3,9 @@ import type { CountryDraft, ValidationIssue, ValidationResult } from '../types/p
 const isExplicitlyEmpty = (value: string | undefined) =>
   value !== undefined && value.trim() === ''
 
+const isTranslatedLabel = (value: { zh: string; en: string }) =>
+  value.zh.trim() !== '' && value.en.trim() !== ''
+
 export const validateCountryDraft = (draft: CountryDraft): ValidationResult => {
   const issues: ValidationIssue[] = []
   const partyChambers = draft.chambers?.filter((chamber) => chamber.isPartyChamber) ?? []
@@ -12,6 +15,30 @@ export const validateCountryDraft = (draft: CountryDraft): ValidationResult => {
 
   if (!draft.name?.trim() || draft.parties?.some((party) => isExplicitlyEmpty(party.name))) {
     issues.push('nameRequired')
+  }
+
+  if (draft.structure && (!draft.structure.stateForm?.trim() || !draft.structure.governmentForm?.trim())) {
+    issues.push('structureInvalid')
+  }
+
+  if ([...(draft.executiveOffices ?? []), ...(draft.chambers ?? []), ...(draft.courts ?? []), ...(draft.territorialLevels ?? [])].some((item) => !isTranslatedLabel(item.label))) {
+    issues.push('institutionLabelInvalid')
+  }
+
+  if ([...(draft.executiveOffices ?? []), ...(draft.chambers ?? [])].some((item) => !item.selectionMethod.trim())) {
+    issues.push('selectionMethodInvalid')
+  }
+
+  if (draft.executiveOffices?.some((office) => !Number.isInteger(office.terms) || office.terms < 0)) {
+    issues.push('officeTermsInvalid')
+  }
+
+  if (draft.chambers?.some((chamber) => !Number.isInteger(chamber.seats) || chamber.seats < 0)) {
+    issues.push('chamberSeatsInvalid')
+  }
+
+  if (draft.parties?.some((party) => party.color !== undefined && !party.color.trim())) {
+    issues.push('partyColorInvalid')
   }
 
   if (draft.executiveOffices ? draft.executiveOffices.length === 0 : !draft.headOfState || !draft.headOfGovernment) {

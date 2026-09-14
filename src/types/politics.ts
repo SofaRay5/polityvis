@@ -137,6 +137,12 @@ export type ValidationIssue =
   | 'courtLevelInvalid'
   | 'territorialCountInvalid'
   | 'territorialAutonomyInvalid'
+  | 'structureInvalid'
+  | 'institutionLabelInvalid'
+  | 'selectionMethodInvalid'
+  | 'officeTermsInvalid'
+  | 'chamberSeatsInvalid'
+  | 'partyColorInvalid'
 
 export interface ValidationResult {
   issues: ValidationIssue[]

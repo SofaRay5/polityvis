@@ -68,4 +68,14 @@ describe('createCountryFromDraft', () => {
     expect(country.courts).toHaveLength(2)
     expect(country.territorialLevels[0].autonomy).toBe(70)
   })
+
+  it('blocks creation for invalid editable persistence fields', () => {
+    expect(() => createCountryFromDraft({
+      name: 'Arcadia',
+      structure: { stateForm: '', governmentForm: 'parliamentary' },
+      executiveOffices: [{ id: 'executive', label: { zh: '行政', en: '' }, selectionMethod: 'appointed', terms: 1.5 }],
+      chambers: [{ id: 'assembly', label: { zh: '议会', en: 'Assembly' }, seats: 1, selectionMethod: 'election', isPartyChamber: true }],
+      parties: [{ name: 'Civic', color: '#2879ff', seats: 1, ideologyPosition: 0 }],
+    }, 'country-1', '2026-09-14T00:00:00.000Z')).toThrow('structureInvalid')
+  })
 })

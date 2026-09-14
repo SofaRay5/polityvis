@@ -23,6 +23,30 @@ describe('validateCountryDraft', () => {
     ).toEqual(expect.arrayContaining(['courtLevelInvalid', 'territorialCountInvalid', 'territorialAutonomyInvalid']))
   })
 
+  it('rejects every invalid editor field that storage requires', () => {
+    expect(
+      validateCountryDraft({
+        name: 'Arcadia',
+        structure: { stateForm: '', governmentForm: ' ' },
+        executiveOffices: [{ id: 'executive', label: { zh: '', en: 'Executive' }, selectionMethod: '', terms: Number.NaN }],
+        chambers: [
+          { id: 'assembly', label: { zh: '议会', en: 'Assembly' }, seats: 1, selectionMethod: 'election', isPartyChamber: true },
+          { id: 'senate', label: { zh: '参议院', en: '' }, seats: -1, selectionMethod: '', isPartyChamber: false },
+        ],
+        courts: [{ id: 'court', label: { zh: '', en: 'Court' }, level: 0 }],
+        territorialLevels: [{ id: 'region', label: { zh: '地区', en: '' }, count: 1, autonomy: 0 }],
+        parties: [{ name: 'Civic', color: '', seats: 1, ideologyPosition: 0 }],
+      }).issues,
+    ).toEqual(expect.arrayContaining([
+      'structureInvalid',
+      'institutionLabelInvalid',
+      'selectionMethodInvalid',
+      'officeTermsInvalid',
+      'chamberSeatsInvalid',
+      'partyColorInvalid',
+    ]))
+  })
+
   it('requires party seats to equal the lower-house total', () => {
     expect(
       validateCountryDraft({
