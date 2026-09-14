@@ -1,12 +1,25 @@
 import { useAppState } from '../context/AppStateContext'
 import { messages } from '../i18n/messages'
 import { CountryLibrary } from './CountryLibrary'
+import { CountryWizard } from './CountryWizard'
 import '../styles/library.css'
 
 export function AppShell() {
   const { countries, activeCountryId, screen, locale, setLocale, setScreen } = useAppState()
   const t = messages[locale]
   const activeCountry = countries.find((country) => country.id === activeCountryId)
+  let content
+  if (screen === 'library') {
+    content = <CountryLibrary />
+  } else if (screen === 'wizard') {
+    content = <CountryWizard />
+  } else {
+    content = <section className="screen-placeholder">
+      <button type="button" className="button-subtle" onClick={() => setScreen('library')}>← {t['navigation.library']}</button>
+      <h1>{activeCountry?.name}</h1>
+      <p>{locale === 'zh' ? '此页面即将推出。' : 'This screen is coming soon.'}</p>
+    </section>
+  }
 
   return (
     <div className="app-shell">
@@ -28,13 +41,7 @@ export function AppShell() {
         </div>
       </header>
       <main className="app-main">
-        {screen === 'library' ? <CountryLibrary /> : (
-          <section className="screen-placeholder">
-            <button type="button" className="button-subtle" onClick={() => setScreen('library')}>← {t['navigation.library']}</button>
-            <h1>{screen === 'wizard' ? t['wizard.title'] : activeCountry?.name}</h1>
-            <p>{locale === 'zh' ? '此页面即将推出。' : 'This screen is coming soon.'}</p>
-          </section>
-        )}
+        {content}
       </main>
     </div>
   )
