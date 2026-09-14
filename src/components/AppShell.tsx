@@ -2,6 +2,8 @@ import { useAppState } from '../context/AppStateContext'
 import { messages } from '../i18n/messages'
 import { CountryLibrary } from './CountryLibrary'
 import { CountryWizard } from './CountryWizard'
+import { CountryOverview } from './CountryOverview'
+import '../styles/parliament.css'
 import '../styles/library.css'
 
 export function AppShell() {
@@ -14,9 +16,9 @@ export function AppShell() {
   } else if (screen === 'wizard') {
     content = <CountryWizard />
   } else {
-    content = <section className="screen-placeholder">
+    content = activeCountry ? <CountryOverview country={activeCountry} locale={locale} /> : <section className="screen-placeholder">
       <button type="button" className="button-subtle" onClick={() => setScreen('library')}>← {t['navigation.library']}</button>
-      <h1>{activeCountry?.name}</h1>
+      <h1>{t['navigation.library']}</h1>
       <p>{locale === 'zh' ? '此页面即将推出。' : 'This screen is coming soon.'}</p>
     </section>
   }
