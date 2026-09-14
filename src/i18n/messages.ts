@@ -130,6 +130,21 @@ const zh = {
   'overview.sources': '官方来源',
   'overview.noSnapshot': '没有可用的资料快照。',
   'overview.noInstitutions': '没有可显示的机构。',
+  'dashboard.scores': '制度评分',
+  'dashboard.systemProfile': '制度画像',
+  'dashboard.facts': '基本事实',
+  'dashboard.executive': '行政职位',
+  'dashboard.chambers': '议院构成',
+  'dashboard.courts': '司法体系',
+  'dashboard.territories': '行政层级',
+  'dashboard.years': '年',
+  'dashboard.level': '层级',
+  'dashboard.autonomy': '自治度',
+  'dashboard.none': '暂无资料',
+  'dashboard.exportOverview': '导出仪表盘 PNG',
+  'dashboard.exportParliament': '导出议会 PNG',
+  'dashboard.exporting': '正在导出…',
+  'dashboard.exportError': '导出失败，请重试。',
 } as const
 
 const en: Record<keyof typeof zh, string> = {
@@ -262,6 +277,21 @@ const en: Record<keyof typeof zh, string> = {
   'overview.sources': 'Official sources',
   'overview.noSnapshot': 'No data snapshot is available.',
   'overview.noInstitutions': 'No institutions are available to display.',
+  'dashboard.scores': 'System scores',
+  'dashboard.systemProfile': 'System profile',
+  'dashboard.facts': 'Key facts',
+  'dashboard.executive': 'Executive offices',
+  'dashboard.chambers': 'Chambers',
+  'dashboard.courts': 'Courts',
+  'dashboard.territories': 'Territorial levels',
+  'dashboard.years': 'years',
+  'dashboard.level': 'Level',
+  'dashboard.autonomy': 'Autonomy',
+  'dashboard.none': 'No data available.',
+  'dashboard.exportOverview': 'Export dashboard PNG',
+  'dashboard.exportParliament': 'Export parliament PNG',
+  'dashboard.exporting': 'Exporting…',
+  'dashboard.exportError': 'Export failed. Please try again.',
 }
 
 export const messages = { zh, en } satisfies Record<Locale, Record<keyof typeof zh, string>>
