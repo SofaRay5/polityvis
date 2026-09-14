@@ -1,32 +1,21 @@
-# React + TypeScript + Vite
+# PolityVis
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+PolityVis is a bilingual, local-first React tool for visualizing fictional political systems. Create countries through a structured questionnaire, then inspect their institutions, parliamentary composition, and authority relationships. The application ships with a dated France snapshot for exploration.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+- `npm test` runs the Vitest unit suite.
+- `npm run lint` runs Oxlint.
+- `npm run build` type-checks and creates a production bundle.
+- `npm run preview` serves the production build after a build.
+
+## Local data
+
+No account or backend is required. PolityVis persists countries in `localStorage` under `polityvis:countries:v1` and the interface language under `polityvis:locale:v1`. To reset the application, remove these keys in your browser's storage tools.
+
+The bundled France record is a fixed snapshot dated 2026-09-11, not live data. Its institutional and parliamentary information is sourced from the [Élysée](https://www.elysee.fr/la-presidence/les-institutions-de-la-cinquieme-republique), the [Assemblée nationale](https://www2.assemblee-nationale.fr/instances/liste/groupes_politiques/effectif), and [info.gouv.fr](https://www.info.gouv.fr/discours/propos-introductifs-a-la-rencontre-de-haut-niveau-au-maroc).
