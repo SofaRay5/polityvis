@@ -2,6 +2,17 @@ import { describe, expect, it } from 'vitest'
 import { createCountryFromDraft } from './countryBuilder'
 
 describe('createCountryFromDraft', () => {
+  it('rejects a draft whose party seats do not fill its party chamber', () => {
+    expect(() => createCountryFromDraft({
+      name: 'Arcadia',
+      structure: { stateForm: 'unitary', governmentForm: 'semiPresidential' },
+      headOfState: { selectionMethod: 'directElection' },
+      headOfGovernment: { selectionMethod: 'appointed' },
+      legislature: { lowerHouseSeats: 10 },
+      parties: [{ name: 'Civic Alliance', color: '#2879ff', seats: 9 }],
+    }, 'country-1', '2026-09-14T00:00:00.000Z')).toThrow('seatTotalMismatch')
+  })
+
   it('creates elected executive and legislative institutions with accountability', () => {
     const country = createCountryFromDraft({
       name: 'Arcadia',
@@ -22,5 +33,8 @@ describe('createCountryFromDraft', () => {
       { from: 'head-of-government', to: 'government', kind: 'leads' },
       { from: 'government', to: 'lower-house', kind: 'accountableTo' },
     ]))
+    expect(country.executiveOffices).toHaveLength(2)
+    expect(country.chambers).toMatchObject([{ id: 'lower-house', seats: 10, isPartyChamber: true }])
+    expect(country.parties.map((party) => party.ideologyPosition)).toEqual([0, 0])
   })
 })

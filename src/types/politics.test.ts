@@ -7,6 +7,7 @@ it('requires saved party groups to have names while drafts may be partial', () =
     name: string
     color: string
     seats: number
+    ideologyPosition: number
   }>()
   expectTypeOf<NonNullable<CountryDraft['parties']>[number]>().toEqualTypeOf<Partial<PartyGroup>>()
 })

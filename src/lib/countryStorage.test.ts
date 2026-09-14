@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { franceSeed } from '../data/france'
-import { loadCountries, loadLocale, saveCountries } from './countryStorage'
+import { loadCountries, loadLocale, normaliseCountry, saveCountries } from './countryStorage'
 
 class MapStorage implements Storage {
   private readonly values = new Map<string, string>()
@@ -35,6 +35,24 @@ class MapStorage implements Storage {
 }
 
 describe('country storage', () => {
+  it('normalises a legacy country with left-right positions and editable institutions', () => {
+    const legacyFrance = JSON.parse(JSON.stringify(franceSeed)) as Record<string, unknown>
+    for (const field of ['presetId', 'systemScores', 'executiveOffices', 'chambers', 'courts', 'territorialLevels']) {
+      delete legacyFrance[field]
+    }
+
+    const country = normaliseCountry(legacyFrance)
+
+    expect(country).toMatchObject({ presetId: 'semiPresidential' })
+    expect(country?.parties[0]).toMatchObject({ ideologyPosition: expect.any(Number) })
+    expect(country?.chambers[0].seats).toBe(577)
+    expect(country?.parties[0].ideologyPosition).toBe(0)
+  })
+
+  it('rejects incomplete expanded saved countries instead of clamping them', () => {
+    expect(normaliseCountry({ ...franceSeed, systemScores: { executive: 0 } })).toBeNull()
+  })
+
   it('returns the France seed when no stored collection exists', () => {
     expect(loadCountries(new MapStorage())).toEqual([franceSeed])
   })

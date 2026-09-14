@@ -10,6 +10,19 @@ export interface PoliticalStructure {
   governmentForm: string
 }
 
+export type SystemAxis = 'executive' | 'participation' | 'centralisation' | 'pluralism' | 'secularism' | 'military'
+
+export type SystemScores = Record<SystemAxis, number>
+
+export type RegimePresetId =
+  | 'parliamentaryMonarchy'
+  | 'semiPresidential'
+  | 'federalPresidential'
+  | 'federalDirectDemocracy'
+  | 'onePartySocialist'
+  | 'absoluteMonarchy'
+  | 'militaryCivilian'
+
 export interface ExecutiveRole {
   title: TranslatedLabel
   officeholder?: string
@@ -22,11 +35,40 @@ export interface Legislature {
   upperHouseLabel?: TranslatedLabel
 }
 
+export interface ExecutiveOffice {
+  id: string
+  label: TranslatedLabel
+  selectionMethod: string
+  terms: number
+}
+
+export interface LegislativeChamber {
+  id: string
+  label: TranslatedLabel
+  seats: number
+  selectionMethod: string
+  isPartyChamber: boolean
+}
+
+export interface Court {
+  id: string
+  label: TranslatedLabel
+  level: number
+}
+
+export interface TerritorialLevel {
+  id: string
+  label: TranslatedLabel
+  count: number
+  autonomy: number
+}
+
 export interface PartyGroup {
   id: string
   name: string
   color: string
   seats: number
+  ideologyPosition: number
 }
 
 export interface Institution {
@@ -52,6 +94,12 @@ export interface Country {
   headOfState: ExecutiveRole
   headOfGovernment: ExecutiveRole
   legislature: Legislature
+  presetId: RegimePresetId
+  systemScores: SystemScores
+  executiveOffices: ExecutiveOffice[]
+  chambers: LegislativeChamber[]
+  courts: Court[]
+  territorialLevels: TerritorialLevel[]
   parties: PartyGroup[]
   institutions: Institution[]
   relations: InstitutionRelation[]
@@ -65,6 +113,12 @@ export interface CountryDraft {
   headOfState?: Partial<ExecutiveRole>
   headOfGovernment?: Partial<ExecutiveRole>
   legislature?: Partial<Legislature>
+  presetId?: RegimePresetId
+  systemScores?: SystemScores
+  executiveOffices?: ExecutiveOffice[]
+  chambers?: LegislativeChamber[]
+  courts?: Court[]
+  territorialLevels?: TerritorialLevel[]
   parties?: Array<Partial<PartyGroup>>
   institutions?: Institution[]
   relations?: InstitutionRelation[]
@@ -76,6 +130,13 @@ export type ValidationIssue =
   | 'lowerHouseSeatsInvalid'
   | 'partySeatsInvalid'
   | 'seatTotalMismatch'
+  | 'partyPositionInvalid'
+  | 'executiveOfficesRequired'
+  | 'chambersRequired'
+  | 'partyChamberInvalid'
+  | 'courtLevelInvalid'
+  | 'territorialCountInvalid'
+  | 'territorialAutonomyInvalid'
 
 export interface ValidationResult {
   issues: ValidationIssue[]
