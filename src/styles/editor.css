@@ -1,0 +1,11 @@
+.editor-panel { display: grid; gap: 24px; }
+.editor-section { display: grid; gap: 12px; padding-top: 22px; border-top: 1px solid var(--border); }
+.editor-section h3 { margin: 0; }
+.editor-list { display: grid; gap: 12px; }
+.editor-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 10px; align-items: end; padding: 14px; border: 1px solid var(--border); border-radius: 8px; }
+.editor-row label { min-width: 0; }
+.editor-row input[type='color'] { padding: 4px; }
+.checkbox-label { display: flex !important; min-height: 44px; align-items: center; gap: 8px; }
+.checkbox-label input { width: auto !important; min-height: auto !important; }
+@media (max-width: 760px) { .editor-row { grid-template-columns: 1fr 1fr; }.editor-row .button-delete { width: max-content; } }
+@media (max-width: 480px) { .editor-row { grid-template-columns: 1fr; } }

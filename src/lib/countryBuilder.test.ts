@@ -37,4 +37,35 @@ describe('createCountryFromDraft', () => {
     expect(country.chambers).toMatchObject([{ id: 'lower-house', seats: 10, isPartyChamber: true }])
     expect(country.parties.map((party) => party.ideologyPosition)).toEqual([0, 0])
   })
+
+  it('keeps custom offices, chambers, courts, and territorial levels', () => {
+    const country = createCountryFromDraft({
+      name: 'Customia',
+      structure: { stateForm: 'federal republic', governmentForm: 'custom' },
+      executiveOffices: [
+        { id: 'president', label: { zh: '总统', en: 'President' }, selectionMethod: 'directElection', terms: 4 },
+        { id: 'minister', label: { zh: '总理', en: 'Prime Minister' }, selectionMethod: 'appointed', terms: 4 },
+      ],
+      chambers: [
+        { id: 'assembly', label: { zh: '议会', en: 'Assembly' }, seats: 10, selectionMethod: 'election', isPartyChamber: true },
+        { id: 'senate', label: { zh: '参议院', en: 'Senate' }, seats: 4, selectionMethod: 'appointment', isPartyChamber: false },
+      ],
+      courts: [
+        { id: 'constitutional', label: { zh: '宪法法院', en: 'Constitutional Court' }, level: 0 },
+        { id: 'appeal', label: { zh: '上诉法院', en: 'Court of Appeal' }, level: 1 },
+      ],
+      territorialLevels: [
+        { id: 'regions', label: { zh: '地区', en: 'Regions' }, count: 12, autonomy: 70 },
+      ],
+      parties: [
+        { name: 'Civic Alliance', color: '#2879ff', seats: 6, ideologyPosition: -50 },
+        { name: 'Green Forum', color: '#36bf86', seats: 4, ideologyPosition: 50 },
+      ],
+    }, 'country-1', '2026-09-14T00:00:00.000Z')
+
+    expect(country.executiveOffices).toHaveLength(2)
+    expect(country.chambers).toHaveLength(2)
+    expect(country.courts).toHaveLength(2)
+    expect(country.territorialLevels[0].autonomy).toBe(70)
+  })
 })
