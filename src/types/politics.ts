@@ -24,7 +24,7 @@ export interface Legislature {
 
 export interface PartyGroup {
   id: string
-  name?: string
+  name: string
   color: string
   seats: number
 }
