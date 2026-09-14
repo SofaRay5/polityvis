@@ -122,6 +122,25 @@ const isTerritorialLevel = (value: unknown): value is TerritorialLevel =>
   (value.autonomy as number) >= 0 &&
   (value.autonomy as number) <= 100
 
+const sameLabel = (left: TranslatedLabel | undefined, right: TranslatedLabel | undefined) =>
+  left === right || (left !== undefined && right !== undefined && left.zh === right.zh && left.en === right.en)
+
+const hasDerivedCompatibilityFields = (country: LegacyCountry, offices: ExecutiveOffice[], chambers: LegislativeChamber[]) => {
+  const primaryOffice = offices[0]
+  const headOfState = offices.find((office) => office.id === 'head-of-state') ?? primaryOffice
+  const headOfGovernment = offices.find((office) => office.id === 'head-of-government') ?? offices[1] ?? primaryOffice
+  const partyChamber = chambers.find((chamber) => chamber.isPartyChamber)
+  const upperChamber = chambers.find((chamber) => !chamber.isPartyChamber)
+
+  return sameLabel(country.headOfState.title, headOfState?.label) &&
+    country.headOfState.selectionMethod === headOfState?.selectionMethod &&
+    sameLabel(country.headOfGovernment.title, headOfGovernment?.label) &&
+    country.headOfGovernment.selectionMethod === headOfGovernment?.selectionMethod &&
+    country.legislature.lowerHouseSeats === partyChamber?.seats &&
+    sameLabel(country.legislature.lowerHouseLabel, partyChamber?.label) &&
+    sameLabel(country.legislature.upperHouseLabel, upperChamber?.label)
+}
+
 const isExpandedCountry = (value: LegacyCountry): value is Country => {
   const expanded = value as LegacyCountry & Record<string, unknown>
   if (
@@ -140,8 +159,12 @@ const isExpandedCountry = (value: LegacyCountry): value is Country => {
     !value.parties.every((party) => Number.isInteger((party as PartyGroup).ideologyPosition) && (party as PartyGroup).ideologyPosition >= -100 && (party as PartyGroup).ideologyPosition <= 100)
   ) return false
 
-  const partyChambers = expanded.chambers.filter((chamber) => chamber.isPartyChamber)
-  return partyChambers.length === 1 && value.parties.reduce((total, party) => total + party.seats, 0) === partyChambers[0].seats
+  const offices = expanded.executiveOffices as ExecutiveOffice[]
+  const chambers = expanded.chambers as LegislativeChamber[]
+  const partyChambers = chambers.filter((chamber) => chamber.isPartyChamber)
+  return partyChambers.length === 1 &&
+    value.parties.reduce((total, party) => total + party.seats, 0) === partyChambers[0].seats &&
+    hasDerivedCompatibilityFields(value, offices, chambers)
 }
 
 const defaultPreset = (country: LegacyCountry): RegimePresetId =>

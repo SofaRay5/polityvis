@@ -53,6 +53,13 @@ describe('country storage', () => {
     expect(normaliseCountry({ ...franceSeed, systemScores: { executive: 0 } })).toBeNull()
   })
 
+  it('rejects expanded countries with stale PowerMap compatibility fields', () => {
+    expect(normaliseCountry({
+      ...franceSeed,
+      headOfState: { ...franceSeed.headOfState, title: { zh: '过期元首', en: 'Stale head of state' } },
+    })).toBeNull()
+  })
+
   it('returns the France seed when no stored collection exists', () => {
     expect(loadCountries(new MapStorage())).toEqual([franceSeed])
   })
