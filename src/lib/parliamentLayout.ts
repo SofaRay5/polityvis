@@ -4,6 +4,10 @@ export interface RenderSeat { index: number; groupId: string; color: string; x: 
 
 export const parliamentViewBox = { minX: -170, minY: -170, width: 660, height: 340 }
 
+export function sortPartyGroups(groups: PartyGroup[]): PartyGroup[] {
+  return [...groups].sort((a, b) => a.ideologyPosition - b.ideologyPosition || b.seats - a.seats || a.name.localeCompare(b.name))
+}
+
 export function buildParliamentSeats(groups: PartyGroup[], totalSeats: number): RenderSeat[] {
   const flattened = groups.flatMap((group) => Array.from({ length: group.seats }, () => group))
   const seats = flattened.slice(0, totalSeats)
