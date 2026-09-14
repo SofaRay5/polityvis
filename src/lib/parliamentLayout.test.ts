@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildParliamentSeats } from './parliamentLayout'
+import { buildParliamentSeats, parliamentViewBox } from './parliamentLayout'
 
 const groups = [
   { id: 'red', name: 'Red', color: '#e55', seats: 2 },
@@ -13,6 +13,27 @@ describe('buildParliamentSeats', () => {
 
   it('keeps every point on or above the baseline', () => {
     expect(buildParliamentSeats(groups, 5).every((seat) => seat.y <= 160)).toBe(true)
+  })
+
+  it('uses a view box that contains every France seat', () => {
+    const seats = buildParliamentSeats(
+      [{ id: 'all', name: 'All', color: '#000', seats: 577 }],
+      577,
+    )
+    expect(seats.every((seat) => (
+      seat.x >= parliamentViewBox.minX &&
+      seat.x <= parliamentViewBox.minX + parliamentViewBox.width &&
+      seat.y >= parliamentViewBox.minY &&
+      seat.y <= parliamentViewBox.minY + parliamentViewBox.height
+    ))).toBe(true)
+  })
+
+  it('gives every France seat its own position', () => {
+    const seats = buildParliamentSeats(
+      [{ id: 'all', name: 'All', color: '#000', seats: 577 }],
+      577,
+    )
+    expect(new Set(seats.map((seat) => `${seat.x},${seat.y}`))).toHaveLength(577)
   })
 
   it('assigns contiguous seats to each group', () => {
