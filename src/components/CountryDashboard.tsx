@@ -4,6 +4,7 @@ import { regimePresets } from '../data/regimePresets'
 import { messages, selectionMethodLabel } from '../i18n/messages'
 import { downloadSvgPng, isExportInProgress, safeExportFilename } from '../lib/pngExport'
 import type { Country, Locale, SystemAxis } from '../types/politics'
+import { countryName, countryStructureLabel } from '../lib/countryDisplay'
 import { ParliamentChart } from './ParliamentChart'
 import { PowerMap } from './PowerMap'
 import '../styles/dashboard.css'
@@ -16,7 +17,7 @@ export function CountryDashboard({ country, locale, onEdit }: { country: Country
   const dashboardRef = useRef<HTMLDivElement>(null)
   const [exporting, setExporting] = useState<ExportKind | null>(null)
   const [exportError, setExportError] = useState(false)
-  const filename = (kind: ExportKind) => safeExportFilename(country.name, kind, new Date().toISOString().slice(0, 10))
+  const filename = (kind: ExportKind) => safeExportFilename(countryName(country, locale), kind, new Date().toISOString().slice(0, 10))
 
   const exportDashboard = async () => {
     if (!dashboardRef.current) return
@@ -52,7 +53,7 @@ export function CountryDashboard({ country, locale, onEdit }: { country: Country
   const preset = regimePresets[country.presetId]
   return <section className="overview"><div className="dashboard" ref={dashboardRef}>
     <header className="dashboard-hero">
-      <div><p className="eyebrow">{preset.name[locale]}</p><h1>{country.name}</h1><p>{country.structure.stateForm} · {country.structure.governmentForm}</p>{onEdit && <button type="button" className="button-subtle" onClick={onEdit}>{t['dashboard.edit']}</button>}</div>
+      <div><p className="eyebrow">{preset.name[locale]}</p><h1>{countryName(country, locale)}</h1><p>{countryStructureLabel(country, 'stateForm', locale)} · {countryStructureLabel(country, 'governmentForm', locale)}</p>{onEdit && <button type="button" className="button-subtle" onClick={onEdit}>{t['dashboard.edit']}</button>}</div>
       <div className="hero-facts"><span>{t['overview.totalSeats']}<b>{country.legislature.lowerHouseSeats}</b></span><span>{t['overview.majority']}<b>{Math.floor(country.legislature.lowerHouseSeats / 2) + 1}</b></span></div>
     </header>
 
