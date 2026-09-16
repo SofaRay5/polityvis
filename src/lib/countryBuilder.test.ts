@@ -1,7 +1,42 @@
 import { describe, expect, it } from 'vitest'
 import { createCountryFromDraft } from './countryBuilder'
+import { regimePresets, regimePresetList } from '../data/regimePresets'
+import { normaliseCountry } from './countryStorage'
 
 describe('createCountryFromDraft', () => {
+  it.each(regimePresetList)('round-trips the $id preset', (preset) => {
+    const country = createCountryFromDraft(preset.default, preset.id, '2026-09-16')
+    expect(normaliseCountry(JSON.parse(JSON.stringify(country)))).toEqual(country)
+  })
+
+  it.each(['parliamentaryMonarchy', 'absoluteMonarchy'] as const)('does not elect the monarch in %s', (id) => {
+    const country = createCountryFromDraft(regimePresets[id].default, id, '2026-09-16')
+    expect(country.headOfState.selectionMethod).toBe('hereditary')
+    expect(country.relations).not.toContainEqual({ from: 'citizens', to: 'head-of-state', kind: 'elects' })
+  })
+
+  it('uses one presidential office with no president-appointing-president edge', () => {
+    const country = createCountryFromDraft(regimePresets.federalPresidential.default, 'us', '2026-09-16')
+    expect(country.executiveOffices).toHaveLength(1)
+    expect(country.relations).not.toContainEqual({ from: 'head-of-state', to: 'head-of-government', kind: 'appoints' })
+    expect(country.relations).toContainEqual({ from: 'head-of-state', to: 'government', kind: 'leads' })
+    expect(country.relations).not.toContainEqual({ from: 'government', to: 'lower-house', kind: 'accountableTo' })
+  })
+
+  it.each(['appointed', 'hereditary', 'militaryAppointment'])('does not show citizen election for a %s chamber', (selectionMethod) => {
+    const draft = structuredClone(regimePresets.semiPresidential.default)
+    draft.chambers![0].selectionMethod = selectionMethod
+    const country = createCountryFromDraft(draft, 'custom', '2026-09-16')
+    expect(country.relations).not.toContainEqual({ from: 'citizens', to: 'lower-house', kind: 'elects' })
+  })
+
+  it('derives parliamentary executive selection and chamber accountability from the chosen method', () => {
+    const draft = structuredClone(regimePresets.federalDirectDemocracy.default)
+    const country = createCountryFromDraft(draft, 'swiss', '2026-09-16')
+    expect(country.headOfGovernment.selectionMethod).toBe('parliamentaryElection')
+    expect(country.relations).toContainEqual({ from: 'lower-house', to: 'head-of-government', kind: 'elects' })
+    expect(country.relations).not.toContainEqual({ from: 'head-of-state', to: 'head-of-government', kind: 'appoints' })
+  })
   it('rejects a draft whose party seats do not fill its party chamber', () => {
     expect(() => createCountryFromDraft({
       name: 'Arcadia',

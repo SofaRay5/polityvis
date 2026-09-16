@@ -1,4 +1,5 @@
 import { franceSeed } from '../data/france'
+import { deriveCompatibilityFields } from './countryBuilder'
 import type { Country, Court, ExecutiveOffice, InstitutionRelation, LegislativeChamber, Locale, PartyGroup, RegimePresetId, SystemAxis, SystemScores, TerritorialLevel, TranslatedLabel } from '../types/politics'
 
 const countriesKey = 'polityvis:countries:v1'
@@ -126,19 +127,15 @@ const sameLabel = (left: TranslatedLabel | undefined, right: TranslatedLabel | u
   left === right || (left !== undefined && right !== undefined && left.zh === right.zh && left.en === right.en)
 
 const hasDerivedCompatibilityFields = (country: LegacyCountry, offices: ExecutiveOffice[], chambers: LegislativeChamber[]) => {
-  const primaryOffice = offices[0]
-  const headOfState = offices.find((office) => office.id === 'head-of-state') ?? primaryOffice
-  const headOfGovernment = offices.find((office) => office.id === 'head-of-government') ?? offices[1] ?? primaryOffice
-  const partyChamber = chambers.find((chamber) => chamber.isPartyChamber)
-  const upperChamber = chambers.find((chamber) => !chamber.isPartyChamber)
+  const { headOfState, headOfGovernment, legislature } = deriveCompatibilityFields(offices, chambers)
 
-  return sameLabel(country.headOfState.title, headOfState?.label) &&
-    country.headOfState.selectionMethod === headOfState?.selectionMethod &&
-    sameLabel(country.headOfGovernment.title, headOfGovernment?.label) &&
-    country.headOfGovernment.selectionMethod === headOfGovernment?.selectionMethod &&
-    country.legislature.lowerHouseSeats === partyChamber?.seats &&
-    sameLabel(country.legislature.lowerHouseLabel, partyChamber?.label) &&
-    sameLabel(country.legislature.upperHouseLabel, upperChamber?.label)
+  return sameLabel(country.headOfState.title, headOfState.title) &&
+    country.headOfState.selectionMethod === headOfState.selectionMethod &&
+    sameLabel(country.headOfGovernment.title, headOfGovernment.title) &&
+    country.headOfGovernment.selectionMethod === headOfGovernment.selectionMethod &&
+    country.legislature.lowerHouseSeats === legislature.lowerHouseSeats &&
+    sameLabel(country.legislature.lowerHouseLabel, legislature.lowerHouseLabel) &&
+    sameLabel(country.legislature.upperHouseLabel, legislature.upperHouseLabel)
 }
 
 const isExpandedCountry = (value: LegacyCountry): value is Country => {
@@ -185,22 +182,30 @@ export const normaliseCountry = (value: unknown): Country | null => {
   if (hasExpandedFields) return isExpandedCountry(value) ? value : null
 
   const lowerHouseLabel = value.legislature.lowerHouseLabel ?? { zh: '下议院', en: 'Lower house' }
-  return {
+  const france = value.id === 'france' ? franceSeed : undefined
+  const executiveOffices = [
+    { id: 'head-of-state', label: value.headOfState.title, selectionMethod: value.headOfState.selectionMethod ?? 'directElection', terms: france?.executiveOffices[0].terms ?? 0 },
+    { id: 'head-of-government', label: value.headOfGovernment.title, selectionMethod: value.headOfGovernment.selectionMethod ?? 'appointed', terms: 0 },
+  ]
+  const chambers = [
+    { id: 'lower-house', label: lowerHouseLabel, seats: value.legislature.lowerHouseSeats, selectionMethod: france?.chambers[0].selectionMethod ?? 'directElection', isPartyChamber: true },
+    ...(value.legislature.upperHouseLabel ? [{ id: 'upper-house', label: value.legislature.upperHouseLabel, seats: france?.chambers[1].seats ?? 0, selectionMethod: france?.chambers[1].selectionMethod ?? 'indirectElection', isPartyChamber: false }] : []),
+  ]
+  const compatibility = deriveCompatibilityFields(executiveOffices, chambers)
+  const country = {
     ...value,
+    ...compatibility,
+    headOfState: { ...value.headOfState, ...compatibility.headOfState },
+    headOfGovernment: { ...value.headOfGovernment, ...compatibility.headOfGovernment },
     presetId: defaultPreset(value),
-    systemScores: defaultScores(),
-    executiveOffices: [
-      { id: 'head-of-state', label: value.headOfState.title, selectionMethod: value.headOfState.selectionMethod ?? 'directElection', terms: 0 },
-      { id: 'head-of-government', label: value.headOfGovernment.title, selectionMethod: value.headOfGovernment.selectionMethod ?? 'appointed', terms: 0 },
-    ],
-    chambers: [
-      { id: 'lower-house', label: lowerHouseLabel, seats: value.legislature.lowerHouseSeats, selectionMethod: 'directElection', isPartyChamber: true },
-      ...(value.legislature.upperHouseLabel ? [{ id: 'upper-house', label: value.legislature.upperHouseLabel, seats: 0, selectionMethod: 'indirectElection', isPartyChamber: false }] : []),
-    ],
+    systemScores: france?.systemScores ?? defaultScores(),
+    executiveOffices,
+    chambers,
     courts: [],
-    territorialLevels: [{ id: 'national', label: { zh: '国家', en: 'National' }, count: 1, autonomy: 0 }],
-    parties: value.parties.map((party) => ({ ...party, ideologyPosition: 0 })),
+    territorialLevels: france?.territorialLevels ?? [{ id: 'national', label: { zh: '国家', en: 'National' }, count: 1, autonomy: 0 }],
+    parties: value.parties.map((party) => ({ ...party, ideologyPosition: (party as Partial<PartyGroup>).ideologyPosition ?? france?.parties.find((seed) => seed.id === party.id)?.ideologyPosition ?? 0 })),
   }
+  return isExpandedCountry(country) ? country : null
 }
 
 export const loadCountries = (storage: Storage): Country[] => {
@@ -219,6 +224,15 @@ export const loadCountries = (storage: Storage): Country[] => {
 }
 
 export const saveCountries = (countries: Country[], storage: Storage) => {
+  const existing = storage.getItem(countriesKey)
+  if (existing !== null) {
+    let readable = false
+    try {
+      const parsed: unknown = JSON.parse(existing)
+      readable = Array.isArray(parsed) && parsed.every((country) => normaliseCountry(country) !== null)
+    } catch { /* Preserve the original payload before replacing malformed JSON. */ }
+    if (!readable) storage.setItem(`${countriesKey}:recovery`, existing)
+  }
   storage.setItem(countriesKey, JSON.stringify(countries))
 }
 

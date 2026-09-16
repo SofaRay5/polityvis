@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { regimeQuestions } from '../data/regimeQuestions'
-import { regimePresets } from '../data/regimePresets'
-import { matchRegimePreset, scoreRegimeAnswers } from './regimeQuiz'
+import { regimePresets, regimePresetList } from '../data/regimePresets'
+import { chooseRegimeDraft, matchRegimePreset, scoreRegimeAnswers } from './regimeQuiz'
+import { createCountryFromDraft } from './countryBuilder'
+import { normaliseCountry } from './countryStorage'
 
 type Answer = -2 | -1 | 0 | 1 | 2
 
@@ -15,6 +17,32 @@ const zeroScores = {
 }
 
 describe('regime quiz', () => {
+  it('refreshes scores when choosing the same preset while preserving institution edits', () => {
+    const preset = regimePresets.parliamentaryMonarchy
+    const edited = structuredClone(preset.default)
+    edited.name = 'Edited country'
+    edited.executiveOffices![0].label.en = 'Edited crown'
+    edited.courts!.push({ id: 'appeals', label: { en: 'Appeals', zh: '上诉' }, level: 2 })
+    const updated = chooseRegimeDraft(edited, preset, zeroScores)
+    const country = createCountryFromDraft(updated, 'edited', '2026-09-16')
+    expect(country.systemScores).toEqual(zeroScores)
+    expect(country.name).toBe('Edited country')
+    expect(country.executiveOffices[0].label.en).toBe('Edited crown')
+    expect(country.courts).toHaveLength(2)
+    expect(normaliseCountry(JSON.parse(JSON.stringify(country)))).toEqual(country)
+    expect(edited.systemScores).toEqual(preset.scores)
+  })
+
+  it('starts a fresh editable draft when a different preset is chosen', () => {
+    const draft = chooseRegimeDraft(regimePresets.absoluteMonarchy.default, regimePresets.federalPresidential, zeroScores)
+    expect(draft.presetId).toBe('federalPresidential')
+    expect(draft.systemScores).toEqual(zeroScores)
+    draft.executiveOffices![0].label.en = 'Changed'
+    expect(regimePresets.federalPresidential.default.executiveOffices![0].label.en).toBe('President')
+  })
+  it.each(regimePresetList)('matches the exact vector for $id', (preset) => {
+    expect(matchRegimePreset(preset.scores).id).toBe(preset.id)
+  })
   it('normalises unanimous executive-concentration answers to 100', () => {
     const answers: Record<string, Answer> = {}
     regimeQuestions.forEach((question) => {

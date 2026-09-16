@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { RegimePreset } from '../data/regimePresets'
 import { useAppState } from '../context/AppStateContext'
 import { messages } from '../i18n/messages'
+import { chooseRegimeDraft } from '../lib/regimeQuiz'
 import type { CountryDraft, SystemScores } from '../types/politics'
 import { CountryEditor } from './CountryEditor'
 import { RegimeQuiz } from './RegimeQuiz'
@@ -23,9 +24,7 @@ export function CountryWizard() {
   const stages: Stage[] = ['quiz', 'result', 'editor']
 
   const choosePreset = (preset: RegimePreset) => {
-    if (!draft || draft.presetId !== preset.id) {
-      setDraft(structuredClone({ ...preset.default, presetId: preset.id, systemScores: scores ?? preset.scores }))
-    }
+    setDraft(chooseRegimeDraft(draft, preset, scores ?? preset.scores))
     setStage('editor')
   }
 

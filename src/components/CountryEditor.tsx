@@ -91,7 +91,7 @@ function LabelInputs({ value, t, onChange }: { value: TranslatedLabel; t: typeof
 }
 
 function SelectionOptions({ t }: { t: typeof messages.en }) {
-  return <><option value="directElection">{t['wizard.option.directElection']}</option><option value="indirectElection">{t['wizard.option.indirectElection']}</option><option value="appointed">{t['wizard.option.appointed']}</option><option value="hereditary">{t['wizard.option.hereditary']}</option><option value="election">{t['editor.election']}</option></>
+  return <><option value="directElection">{t['wizard.option.directElection']}</option><option value="indirectElection">{t['wizard.option.indirectElection']}</option><option value="appointed">{t['wizard.option.appointed']}</option><option value="hereditary">{t['wizard.option.hereditary']}</option><option value="parliamentaryElection">{t['wizard.option.parliamentaryElection']}</option><option value="militaryAppointment">{t['wizard.option.militaryAppointment']}</option><option value="election">{t['editor.election']}</option></>
 }
 
 function Remove({ onClick, t }: { onClick: () => void; t: typeof messages.en }) {

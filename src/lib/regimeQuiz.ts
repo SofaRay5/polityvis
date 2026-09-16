@@ -1,10 +1,13 @@
 import { regimePresetList, type RegimePreset } from '../data/regimePresets'
 import { regimeQuestions } from '../data/regimeQuestions'
-import type { SystemAxis, SystemScores } from '../types/politics'
+import type { CountryDraft, SystemAxis, SystemScores } from '../types/politics'
 
 type Answer = -2 | -1 | 0 | 1 | 2
 
 const axes: SystemAxis[] = ['executive', 'participation', 'centralisation', 'pluralism', 'secularism', 'military']
+
+export const chooseRegimeDraft = (current: CountryDraft | null, preset: RegimePreset, scores: SystemScores): CountryDraft =>
+  structuredClone({ ...(current?.presetId === preset.id ? current : preset.default), presetId: preset.id, systemScores: scores })
 
 export const scoreRegimeAnswers = (answers: Record<string, Answer>): SystemScores => {
   const questionIds = new Set(regimeQuestions.map((question) => question.id))

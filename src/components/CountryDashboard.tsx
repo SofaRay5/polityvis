@@ -1,7 +1,7 @@
 import html2canvas from 'html2canvas'
 import { useRef, useState } from 'react'
 import { regimePresets } from '../data/regimePresets'
-import { messages } from '../i18n/messages'
+import { messages, selectionMethodLabel } from '../i18n/messages'
 import { downloadSvgPng, isExportInProgress, safeExportFilename } from '../lib/pngExport'
 import type { Country, Locale, SystemAxis } from '../types/politics'
 import { ParliamentChart } from './ParliamentChart'
@@ -61,13 +61,13 @@ export function CountryDashboard({ country, locale }: { country: Country; locale
 
       <section className="dashboard-panel"><div className="panel-heading"><div><p className="eyebrow">{t['overview.structure']}</p><h2>{t['dashboard.facts']}</h2></div></div><dl className="fact-list"><div><dt>{t['overview.headOfState']}</dt><dd>{country.headOfState.title[locale]}{country.headOfState.officeholder && ` · ${country.headOfState.officeholder}`}</dd></div><div><dt>{t['overview.headOfGovernment']}</dt><dd>{country.headOfGovernment.title[locale]}{country.headOfGovernment.officeholder && ` · ${country.headOfGovernment.officeholder}`}</dd></div><div><dt>{t['overview.legislature']}</dt><dd>{country.legislature.lowerHouseLabel?.[locale] ?? t['wizard.lowerHouse']}</dd></div></dl></section>
 
-      <section className="dashboard-panel offices-panel"><div className="panel-heading"><div><p className="eyebrow">{t['editor.offices']}</p><h2>{t['dashboard.executive']}</h2></div></div><ul className="detail-list">{country.executiveOffices.map((office) => <li key={office.id}><b>{office.label[locale]}</b><span>{office.selectionMethod} · {office.terms} {t['dashboard.years']}</span></li>)}</ul></section>
+      <section className="dashboard-panel offices-panel"><div className="panel-heading"><div><p className="eyebrow">{t['editor.offices']}</p><h2>{t['dashboard.executive']}</h2></div></div><ul className="detail-list">{country.executiveOffices.map((office) => <li key={office.id}><b>{office.label[locale]}</b><span>{selectionMethodLabel(office.selectionMethod, locale)} · {office.terms} {t['dashboard.years']}</span></li>)}</ul></section>
 
       <div className="dashboard-panel power-panel"><PowerMap country={country} locale={locale} /></div>
 
       <div className="dashboard-panel parliament-panel"><ParliamentChart country={country} locale={locale} /></div>
 
-      <section className="dashboard-panel"><div className="panel-heading"><div><p className="eyebrow">{t['editor.chambers']}</p><h2>{t['dashboard.chambers']}</h2></div></div><ul className="detail-list">{country.chambers.map((chamber) => <li key={chamber.id}><b>{chamber.label[locale]}</b><span>{chamber.seats} · {chamber.selectionMethod}</span></li>)}</ul></section>
+      <section className="dashboard-panel"><div className="panel-heading"><div><p className="eyebrow">{t['editor.chambers']}</p><h2>{t['dashboard.chambers']}</h2></div></div><ul className="detail-list">{country.chambers.map((chamber) => <li key={chamber.id}><b>{chamber.label[locale]}</b><span>{chamber.seats} · {selectionMethodLabel(chamber.selectionMethod, locale)}</span></li>)}</ul></section>
 
       <section className="dashboard-panel"><div className="panel-heading"><div><p className="eyebrow">{t['editor.courts']}</p><h2>{t['dashboard.courts']}</h2></div></div>{country.courts.length ? <ul className="detail-list">{country.courts.map((court) => <li key={court.id}><b>{court.label[locale]}</b><span>{t['dashboard.level']} {court.level}</span></li>)}</ul> : <p className="empty-detail">{t['dashboard.none']}</p>}</section>
 

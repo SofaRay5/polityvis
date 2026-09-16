@@ -48,7 +48,53 @@ describe('country storage', () => {
     expect(country).toMatchObject({ presetId: 'semiPresidential' })
     expect(country?.parties[0]).toMatchObject({ ideologyPosition: expect.any(Number) })
     expect(country?.chambers[0].seats).toBe(577)
-    expect(country?.parties[0].ideologyPosition).toBe(0)
+    expect(country?.parties[0].ideologyPosition).toBe(85)
+    expect(country?.systemScores).toEqual(franceSeed.systemScores)
+    expect(country?.chambers).toEqual(franceSeed.chambers)
+    expect(country?.executiveOffices).toEqual(franceSeed.executiveOffices)
+    expect(country?.territorialLevels).toEqual(franceSeed.territorialLevels)
+    expect(country?.institutions).toEqual(franceSeed.institutions)
+    expect(country?.relations).toEqual(franceSeed.relations)
+    expect(normaliseCountry(JSON.parse(JSON.stringify(country)))).toEqual(country)
+  })
+
+  it('migrates legacy optional fields into compatibility fields that survive a second load', () => {
+    const legacy = JSON.parse(JSON.stringify(franceSeed))
+    legacy.id = 'legacy-custom'
+    for (const field of ['presetId', 'systemScores', 'executiveOffices', 'chambers', 'courts', 'territorialLevels']) delete legacy[field]
+    delete legacy.headOfState.selectionMethod
+    delete legacy.headOfGovernment.selectionMethod
+    delete legacy.legislature.lowerHouseLabel
+    legacy.parties.forEach((party: { ideologyPosition?: number }) => { delete party.ideologyPosition })
+    const country = normaliseCountry(legacy)
+    expect(country).not.toBeNull()
+    expect(normaliseCountry(JSON.parse(JSON.stringify(country)))).toEqual(country)
+  })
+
+  it('fills legacy France party positions by id without replacing edited legacy data', () => {
+    const legacy = JSON.parse(JSON.stringify(franceSeed))
+    for (const field of ['presetId', 'systemScores', 'executiveOffices', 'chambers', 'courts', 'territorialLevels']) delete legacy[field]
+    legacy.name = 'My France'
+    legacy.parties.forEach((party: { ideologyPosition?: number }) => { delete party.ideologyPosition })
+    const country = normaliseCountry(legacy)
+    expect(country?.name).toBe('My France')
+    expect(country?.parties.find((party) => party.id === 'lfi-nfp')?.ideologyPosition).toBe(-75)
+    expect(country?.chambers[1].seats).toBe(348)
+  })
+
+  it.each(['head-of-state', 'custom-office'])('round-trips a single executive office named %s', (id) => {
+    const draft = structuredClone(regimePresets.semiPresidential.default)
+    draft.executiveOffices = [{ ...draft.executiveOffices![0], id }]
+    const country = createCountryFromDraft(draft, 'single', '2026-09-16')
+    expect(normaliseCountry(JSON.parse(JSON.stringify(country)))).toEqual(country)
+  })
+
+  it('preserves unreadable stored data before an explicit replacement', () => {
+    const raw = JSON.stringify([franceSeed, { id: 'broken' }])
+    const storage = new MapStorage({ 'polityvis:countries:v1': raw })
+    saveCountries([franceSeed], storage)
+    expect(storage.getItem('polityvis:countries:v1:recovery')).toBe(raw)
+    expect(loadCountries(storage)).toEqual([franceSeed])
   })
 
   it('rejects incomplete expanded saved countries instead of clamping them', () => {

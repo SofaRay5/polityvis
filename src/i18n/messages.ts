@@ -58,6 +58,9 @@ const zh = {
   'wizard.option.indirectElection': '间接选举',
   'wizard.option.hereditary': '世袭',
   'wizard.option.appointed': '任命',
+  'wizard.option.parliamentaryElection': '议会选举',
+  'wizard.option.militaryAppointment': '军方任命',
+  'selection.presidentAppointment': '由共和国总统任命',
   'quiz.question': '问题',
   'quiz.answer': '请选择一个答案',
   'quiz.stronglyDisagree': '非常不同意',
@@ -205,6 +208,9 @@ const en: Record<keyof typeof zh, string> = {
   'wizard.option.indirectElection': 'Indirect election',
   'wizard.option.hereditary': 'Hereditary succession',
   'wizard.option.appointed': 'Appointment',
+  'wizard.option.parliamentaryElection': 'Parliamentary election',
+  'wizard.option.militaryAppointment': 'Military appointment',
+  'selection.presidentAppointment': 'Appointed by the President of the Republic',
   'quiz.question': 'Question',
   'quiz.answer': 'Choose an answer',
   'quiz.stronglyDisagree': 'Strongly disagree',
@@ -297,6 +303,23 @@ const en: Record<keyof typeof zh, string> = {
 export const messages = { zh, en } satisfies Record<Locale, Record<keyof typeof zh, string>>
 
 export type MessageKey = keyof typeof zh
+
+const selectionKeys: Record<string, MessageKey> = {
+  directElection: 'wizard.option.directElection',
+  indirectElection: 'wizard.option.indirectElection',
+  hereditary: 'wizard.option.hereditary',
+  appointed: 'wizard.option.appointed',
+  appointment: 'wizard.option.appointed',
+  parliamentaryElection: 'wizard.option.parliamentaryElection',
+  militaryAppointment: 'wizard.option.militaryAppointment',
+  election: 'editor.election',
+  'Direct universal suffrage': 'wizard.option.directElection',
+  'Indirect suffrage': 'wizard.option.indirectElection',
+  'Appointed by the President of the Republic': 'selection.presidentAppointment',
+}
+
+export const selectionMethodLabel = (method: string, locale: Locale): string =>
+  Object.hasOwn(selectionKeys, method) ? messages[locale][selectionKeys[method]] : method
 
 export const relationMessageKey = (kind: InstitutionRelation['kind']): MessageKey =>
   `relation.${kind}` as MessageKey

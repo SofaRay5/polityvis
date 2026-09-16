@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useReducer, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useReducer, useRef, type ReactNode } from 'react'
 import { messages } from '../i18n/messages'
 import { loadCountries, loadLocale, saveCountries } from '../lib/countryStorage'
 import type { Country, Locale } from '../types/politics'
@@ -77,8 +77,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     screen: 'library',
   }))
 
+  const persistedCountries = useRef(state.countries)
   useEffect(() => {
+    if (state.countries === persistedCountries.current) return
     saveCountries(state.countries, window.localStorage)
+    persistedCountries.current = state.countries
   }, [state.countries])
 
   useEffect(() => {

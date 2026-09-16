@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { franceSeed } from '../data/france'
 import { buildParliamentSeats, parliamentViewBox, sortPartyGroups } from './parliamentLayout'
 
 const groups = [
@@ -27,6 +28,19 @@ describe('sortPartyGroups', () => {
 })
 
 describe('buildParliamentSeats', () => {
+  it('places France parties in contiguous left-to-right angular blocks', () => {
+    const seats = buildParliamentSeats(franceSeed.parties, 577)
+    const angularOrder = [...seats].sort((a, b) => Math.atan2(160 - b.y, b.x - 160) - Math.atan2(160 - a.y, a.x - 160))
+    const partyOrder = angularOrder.filter((seat, index) => !index || seat.groupId !== angularOrder[index - 1].groupId).map((seat) => seat.groupId)
+    expect(partyOrder).toEqual(['lfi-nfp', 'gdr', 'ecologiste', 'socialistes', 'non-inscrits', 'liot', 'dem', 'epr', 'horizons', 'dr', 'udr', 'rn'])
+  })
+
+  it.each([1, 577, 1000, 2000])('renders every seat once within bounds for a %i-seat chamber', (total) => {
+    const seats = buildParliamentSeats([{ ...groups[0], seats: total }], total)
+    expect(seats).toHaveLength(total)
+    expect(new Set(seats.map((seat) => `${seat.x},${seat.y}`)).size).toBe(total)
+    expect(seats.every((seat) => seat.x >= parliamentViewBox.minX && seat.x <= parliamentViewBox.minX + parliamentViewBox.width && seat.y >= parliamentViewBox.minY && seat.y <= parliamentViewBox.minY + parliamentViewBox.height)).toBe(true)
+  })
   it('returns one render seat per configured seat', () => {
     expect(buildParliamentSeats(groups, 5)).toHaveLength(5)
   })
