@@ -11,7 +11,7 @@ import '../styles/dashboard.css'
 const axes: SystemAxis[] = ['executive', 'participation', 'centralisation', 'pluralism', 'secularism', 'military']
 type ExportKind = 'overview' | 'parliament'
 
-export function CountryDashboard({ country, locale }: { country: Country; locale: Locale }) {
+export function CountryDashboard({ country, locale, onEdit }: { country: Country; locale: Locale; onEdit?: () => void }) {
   const t = messages[locale]
   const dashboardRef = useRef<HTMLDivElement>(null)
   const [exporting, setExporting] = useState<ExportKind | null>(null)
@@ -52,12 +52,12 @@ export function CountryDashboard({ country, locale }: { country: Country; locale
   const preset = regimePresets[country.presetId]
   return <section className="overview"><div className="dashboard" ref={dashboardRef}>
     <header className="dashboard-hero">
-      <div><p className="eyebrow">{preset.name[locale]}</p><h1>{country.name}</h1><p>{country.structure.stateForm} · {country.structure.governmentForm}</p></div>
+      <div><p className="eyebrow">{preset.name[locale]}</p><h1>{country.name}</h1><p>{country.structure.stateForm} · {country.structure.governmentForm}</p>{onEdit && <button type="button" className="button-subtle" onClick={onEdit}>{t['dashboard.edit']}</button>}</div>
       <div className="hero-facts"><span>{t['overview.totalSeats']}<b>{country.legislature.lowerHouseSeats}</b></span><span>{t['overview.majority']}<b>{Math.floor(country.legislature.lowerHouseSeats / 2) + 1}</b></span></div>
     </header>
 
     <div className="dashboard-grid">
-      <section className="dashboard-panel score-panel"><div className="panel-heading"><div><p className="eyebrow">{t['dashboard.scores']}</p><h2>{t['dashboard.systemProfile']}</h2></div></div>{axes.map((axis) => <div className="score-row" key={axis}><span>{t[`result.axis.${axis}`]}</span><div aria-label={`${t[`result.axis.${axis}`]}: ${country.systemScores[axis]}`} className="score-track"><i style={{ width: `${Math.abs(country.systemScores[axis]) / 2}%`, marginLeft: country.systemScores[axis] < 0 ? `${50 - Math.abs(country.systemScores[axis]) / 2}%` : '50%' }} /></div><b>{country.systemScores[axis]}</b></div>)}</section>
+      <section className="dashboard-panel score-panel"><div className="panel-heading"><div><p className="eyebrow">{t['dashboard.scores']}</p><h2>{t['dashboard.systemProfile']}</h2></div></div>{axes.map((axis) => <div className="score-row" key={axis}><span>{t[`result.axis.${axis}`]}</span><div data-score-axis={axis} aria-label={`${t[`result.axis.${axis}`]}: ${country.systemScores[axis]}`} className="score-track"><i style={{ width: `${Math.abs(country.systemScores[axis]) / 2}%`, marginLeft: country.systemScores[axis] < 0 ? `${50 - Math.abs(country.systemScores[axis]) / 2}%` : '50%' }} /></div><b className="score-value">{country.systemScores[axis]}</b></div>)}</section>
 
       <section className="dashboard-panel"><div className="panel-heading"><div><p className="eyebrow">{t['overview.structure']}</p><h2>{t['dashboard.facts']}</h2></div></div><dl className="fact-list"><div><dt>{t['overview.headOfState']}</dt><dd>{country.headOfState.title[locale]}{country.headOfState.officeholder && ` · ${country.headOfState.officeholder}`}</dd></div><div><dt>{t['overview.headOfGovernment']}</dt><dd>{country.headOfGovernment.title[locale]}{country.headOfGovernment.officeholder && ` · ${country.headOfGovernment.officeholder}`}</dd></div><div><dt>{t['overview.legislature']}</dt><dd>{country.legislature.lowerHouseLabel?.[locale] ?? t['wizard.lowerHouse']}</dd></div></dl></section>
 

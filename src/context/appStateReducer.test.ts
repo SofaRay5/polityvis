@@ -45,6 +45,13 @@ describe('appStateReducer', () => {
     expect(appStateReducer(initialState, { type: 'select', id: 'france' })).toMatchObject({ activeCountryId: 'france', screen: 'overview' })
   })
 
+  it('updates an existing country and returns to its overview', () => {
+    const updated = { ...franceSeed, name: 'France updated' }
+    const next = appStateReducer({ ...initialState, activeCountryId: 'france', screen: 'wizard' }, { type: 'update', country: updated })
+    expect(next.countries[0]).toEqual(updated)
+    expect(next).toMatchObject({ activeCountryId: 'france', screen: 'overview' })
+  })
+
   it('adds and opens a newly created country', () => {
     const country = { ...franceSeed, id: 'new-country', name: 'New country' }
     const next = appStateReducer(initialState, { type: 'create', country })

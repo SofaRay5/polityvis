@@ -14,6 +14,9 @@ export interface AppState {
 
 type AppAction =
   | { type: 'create'; country: Country }
+  | { type: 'update'; country: Country }
+  | { type: 'edit'; id: string }
+  | { type: 'new' }
   | { type: 'duplicate'; id: string; locale: Locale }
   | { type: 'delete'; id: string }
   | { type: 'select'; id: string }
@@ -27,6 +30,14 @@ export function appStateReducer(state: AppState, action: AppAction): AppState {
     case 'create':
       if (state.countries.some((country) => country.id === action.country.id)) return state
       return { ...state, countries: [...state.countries, action.country], activeCountryId: action.country.id, screen: 'overview' }
+    case 'update':
+      if (!state.countries.some((country) => country.id === action.country.id)) return state
+      return { ...state, countries: state.countries.map((country) => country.id === action.country.id ? action.country : country), activeCountryId: action.country.id, screen: 'overview' }
+    case 'edit':
+      if (!state.countries.some((country) => country.id === action.id)) return state
+      return { ...state, activeCountryId: action.id, screen: 'wizard' }
+    case 'new':
+      return { ...state, activeCountryId: null, screen: 'wizard' }
     case 'duplicate': {
       const original = state.countries.find((country) => country.id === action.id)
       if (!original) return state
@@ -60,6 +71,9 @@ export function appStateReducer(state: AppState, action: AppAction): AppState {
 
 interface AppStateValue extends AppState {
   createCountry: (country: Country) => void
+  updateCountry: (country: Country) => void
+  editCountry: (id: string) => void
+  startNewCountry: () => void
   duplicateCountry: (id: string) => void
   deleteCountry: (id: string) => void
   selectCountry: (id: string) => void
@@ -93,6 +107,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     <AppStateContext.Provider value={{
       ...state,
       createCountry: (country) => dispatch({ type: 'create', country }),
+      updateCountry: (country) => dispatch({ type: 'update', country }),
+      editCountry: (id) => dispatch({ type: 'edit', id }),
+      startNewCountry: () => dispatch({ type: 'new' }),
       duplicateCountry: (id) => dispatch({ type: 'duplicate', id, locale: state.locale }),
       deleteCountry: (id) => dispatch({ type: 'delete', id }),
       selectCountry: (id) => dispatch({ type: 'select', id }),

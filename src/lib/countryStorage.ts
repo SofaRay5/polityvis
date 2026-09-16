@@ -1,4 +1,5 @@
 import { franceSeed } from '../data/france'
+import { regimePresetList } from '../data/regimePresets'
 import { deriveCompatibilityFields } from './countryBuilder'
 import type { Country, Court, ExecutiveOffice, InstitutionRelation, LegislativeChamber, Locale, PartyGroup, RegimePresetId, SystemAxis, SystemScores, TerritorialLevel, TranslatedLabel } from '../types/politics'
 
@@ -14,7 +15,7 @@ const relationKinds: InstitutionRelation['kind'][] = [
 ]
 
 const systemAxes: SystemAxis[] = ['executive', 'participation', 'centralisation', 'pluralism', 'secularism', 'military']
-const presetIds: RegimePresetId[] = ['parliamentaryMonarchy', 'semiPresidential', 'federalPresidential', 'federalDirectDemocracy', 'onePartySocialist', 'absoluteMonarchy', 'militaryCivilian']
+const presetIds: RegimePresetId[] = regimePresetList.map((preset) => preset.id)
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)

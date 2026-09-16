@@ -7,7 +7,7 @@ import '../styles/parliament.css'
 import '../styles/library.css'
 
 export function AppShell() {
-  const { countries, activeCountryId, screen, locale, setLocale, setScreen } = useAppState()
+  const { countries, activeCountryId, screen, locale, setLocale, setScreen, editCountry, startNewCountry } = useAppState()
   const t = messages[locale]
   const activeCountry = countries.find((country) => country.id === activeCountryId)
   let content
@@ -16,7 +16,7 @@ export function AppShell() {
   } else if (screen === 'wizard') {
     content = <CountryWizard />
   } else {
-    content = activeCountry ? <CountryDashboard country={activeCountry} locale={locale} /> : <section className="screen-placeholder">
+    content = activeCountry ? <CountryDashboard country={activeCountry} locale={locale} onEdit={() => editCountry(activeCountry.id)} /> : <section className="screen-placeholder">
       <button type="button" className="button-subtle" onClick={() => setScreen('library')}>← {t['navigation.library']}</button>
       <h1>{t['navigation.library']}</h1>
       <p>{locale === 'zh' ? '此页面即将推出。' : 'This screen is coming soon.'}</p>
@@ -37,7 +37,7 @@ export function AppShell() {
             <button type="button" lang="zh-CN" aria-pressed={locale === 'zh'} onClick={() => setLocale('zh')}>{t['language.zh']}</button>
             <button type="button" lang="en" aria-pressed={locale === 'en'} onClick={() => setLocale('en')}>{t['language.en']}</button>
           </div>
-          <button type="button" className="button-primary" onClick={() => setScreen('wizard')}>
+          <button type="button" className="button-primary" onClick={startNewCountry}>
             <span aria-hidden="true">＋</span> {t['country.new']}
           </button>
         </div>

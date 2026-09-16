@@ -22,6 +22,14 @@ export type RegimePresetId =
   | 'onePartySocialist'
   | 'absoluteMonarchy'
   | 'militaryCivilian'
+  | 'parliamentaryRepublic'
+  | 'federalParliamentary'
+  | 'directorialRepublic'
+  | 'theocraticRepublic'
+  | 'dominantPartyRepublic'
+  | 'socialistCouncil'
+  | 'constitutionalSultanate'
+  | 'revolutionaryJunta'
 
 export interface ExecutiveRole {
   title: TranslatedLabel

@@ -15,6 +15,17 @@ describe('dashboard selection labels', () => {
     expect(html).not.toContain('Indirect suffrage')
   })
 
+  it('renders every France system score as a labeled value', () => {
+    const html = renderToStaticMarkup(<CountryDashboard country={franceSeed} locale="zh" onEdit={() => undefined} />)
+    expect(html).toContain('data-score-axis="executive"')
+    expect(html).toContain('>30</b>')
+    expect(html).toContain('>20</b>')
+    expect(html).toContain('>60</b>')
+    expect(html).toContain('>65</b>')
+    expect(html).toContain('>90</b>')
+    expect(html).toContain('>-90</b>')
+  })
+
   it.each(regimePresetList)('localizes the $id preset method codes in both languages', (preset) => {
     const country = createCountryFromDraft(preset.default, preset.id, '2026-09-16')
     for (const locale of ['zh', 'en'] as const) {

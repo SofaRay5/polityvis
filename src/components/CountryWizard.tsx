@@ -3,6 +3,7 @@ import type { RegimePreset } from '../data/regimePresets'
 import { useAppState } from '../context/AppStateContext'
 import { messages } from '../i18n/messages'
 import { chooseRegimeDraft } from '../lib/regimeQuiz'
+import { createCountryFromDraft } from '../lib/countryBuilder'
 import type { CountryDraft, SystemScores } from '../types/politics'
 import { CountryEditor } from './CountryEditor'
 import { RegimeQuiz } from './RegimeQuiz'
@@ -14,11 +15,13 @@ type Stage = 'quiz' | 'result' | 'editor'
 type Answer = -2 | -1 | 0 | 1 | 2
 
 export function CountryWizard() {
-  const { locale, setScreen } = useAppState()
+  const { locale, countries, activeCountryId, setScreen, updateCountry } = useAppState()
   const t = messages[locale]
-  const [stage, setStage] = useState<Stage>('quiz')
+  const existingCountry = countries.find((country) => country.id === activeCountryId)
+  const editing = Boolean(existingCountry)
+  const [stage, setStage] = useState<Stage>(editing ? 'editor' : 'quiz')
   const [scores, setScores] = useState<SystemScores | null>(null)
-  const [draft, setDraft] = useState<CountryDraft | null>(null)
+  const [draft, setDraft] = useState<CountryDraft | null>(() => existingCountry ? structuredClone(existingCountry) : null)
   const [answers, setAnswers] = useState<Record<string, Answer>>({})
   const [questionIndex, setQuestionIndex] = useState(0)
   const stages: Stage[] = ['quiz', 'result', 'editor']
@@ -34,6 +37,6 @@ export function CountryWizard() {
     <WizardProgress step={stages.indexOf(stage)} locale={locale} />
     {stage === 'quiz' && <RegimeQuiz locale={locale} index={questionIndex} answers={answers} onIndexChange={setQuestionIndex} onAnswersChange={setAnswers} onComplete={(value) => { setScores(value); setStage('result') }} />}
     {stage === 'result' && scores && <RegimeResult locale={locale} scores={scores} onBack={() => setStage('quiz')} onContinue={choosePreset} />}
-    {stage === 'editor' && draft && <CountryEditor draft={draft} onDraftChange={setDraft} onBack={() => setStage('result')} />}
+    {stage === 'editor' && draft && <CountryEditor draft={draft} onDraftChange={setDraft} onBack={() => setScreen(editing ? 'overview' : 'library')} onSave={editing ? (nextDraft) => updateCountry(createCountryFromDraft(nextDraft, existingCountry!.id, existingCountry!.createdAt)) : undefined} />}
   </section>
 }

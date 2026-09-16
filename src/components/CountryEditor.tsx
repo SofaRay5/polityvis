@@ -9,7 +9,7 @@ const colors = ['#2879ff', '#e85d63', '#35bf88', '#e6b83f', '#9b70e9', '#37b7c8'
 const id = () => crypto.randomUUID()
 const label = (zh: string, en: string): TranslatedLabel => ({ zh, en })
 
-export function CountryEditor({ draft, onDraftChange, onBack }: { draft: CountryDraft; onDraftChange: (draft: CountryDraft) => void; onBack: () => void }) {
+export function CountryEditor({ draft, onDraftChange, onBack, onSave }: { draft: CountryDraft; onDraftChange: (draft: CountryDraft) => void; onBack: () => void; onSave?: (draft: CountryDraft) => void }) {
   const { locale, createCountry } = useAppState()
   const t = messages[locale]
   const setDraft = onDraftChange
@@ -20,7 +20,8 @@ export function CountryEditor({ draft, onDraftChange, onBack }: { draft: Country
   const updateParties = (parties: Array<Partial<PartyGroup>>) => setDraft({ ...draft, parties })
   const submit = () => {
     if (issues.length > 0) return
-    createCountry(createCountryFromDraft(draft, id(), new Date().toISOString()))
+    if (onSave) onSave(draft)
+    else createCountry(createCountryFromDraft(draft, id(), new Date().toISOString()))
   }
 
   return <div className="wizard-panel editor-panel">
@@ -78,7 +79,7 @@ export function CountryEditor({ draft, onDraftChange, onBack }: { draft: Country
     </EditorSection>
 
     {issues.map((issue) => <p className="field-error" key={issue}>{t[`validation.${issue}`]}</p>)}
-    <div className="wizard-actions"><button type="button" className="button-subtle" onClick={onBack}>{t['wizard.back']}</button><button type="button" className="button-primary" disabled={issues.length > 0} onClick={submit}>{t['wizard.create']}</button></div>
+    <div className="wizard-actions"><button type="button" className="button-subtle" onClick={onBack}>{t['wizard.back']}</button><button type="button" className="button-primary" disabled={issues.length > 0} onClick={submit}>{onSave ? t['editor.save'] : t['wizard.create']}</button></div>
   </div>
 }
 
