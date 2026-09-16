@@ -2,6 +2,10 @@
 
 PolityVis is a bilingual, local-first React tool for visualizing fictional political systems. Create countries through a structured questionnaire, then inspect their institutions, parliamentary composition, and authority relationships. The application ships with a dated France snapshot for exploration.
 
+Live demo: https://sofaray5.github.io/polityvis/
+
+GitHub Pages deploys automatically from `main` via `.github/workflows/deploy-pages.yml`. In the repository settings, set **Pages → Source** to **GitHub Actions** once.
+
 ## Development
 
 ```bash

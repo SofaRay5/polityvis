@@ -4,6 +4,7 @@ import { defineConfig } from 'vitest/config'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: process.env.GITHUB_ACTIONS ? '/polityvis/' : '/',
   test: {
     environment: 'node',
     include: ['src/**/*.test.{ts,tsx}'],
